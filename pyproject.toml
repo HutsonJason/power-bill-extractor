@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "power-bill-extractor"
-version = "0.2.0"
+version = "0.2.2"
 description = "An FPL power bill extractor"
 license = "MIT"
 authors = ["Jason Hutson <jhutsondev@gmail.com>"]
 readme = "README.md"
+repository = "https://github.com/HutsonJason/power-bill-extractor"
 packages = [{include = "power_bill_extractor"}]
 
 [tool.poetry.dependencies]
