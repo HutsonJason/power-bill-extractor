@@ -3,7 +3,7 @@ name = "power-bill-extractor"
 version = "0.2.2"
 description = "An FPL power bill extractor"
 license = "MIT"
-authors = ["Jason Hutson <jhutsondev@gmail.com>"]
+authors = ["Jason Hutson <110316760+HutsonJason@users.noreply.github.com>"]
 readme = "README.md"
 repository = "https://github.com/HutsonJason/power-bill-extractor"
 packages = [{include = "power_bill_extractor"}]
