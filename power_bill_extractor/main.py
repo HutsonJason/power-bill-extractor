@@ -4,6 +4,7 @@ import os
 import re
 
 import click
+from bill import PowerBill
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextBoxHorizontal
 
@@ -31,7 +32,7 @@ def main(filename, output):
             "Start Date",
             "End Date",
             "Service Length",
-            "Total Owed",
+            "Bill Amount",
             "Current Meter Reading",
             "Previous Meter Reading",
             "kWh Used",
@@ -48,28 +49,29 @@ def main(filename, output):
         # Add row for every PDF file.
         for file in file_list:
             pdf_file = f"{file_directory}/{file}"
-            boxes = get_boxes(pdf_file)
-            start_date, end_date, service_length = get_dates(boxes)
-            total_amount_owed = get_bill_amount(boxes)
-            current_meter_reading = get_current_reading(boxes)
-            previous_meter_reading = get_previous_reading(boxes)
-            kwh_used = current_meter_reading - previous_meter_reading
-            nonfuel_first_1000, nonfuel_over_1000 = get_nonfuel_costs(boxes)
-            fuel_first_1000, fuel_over_1000 = get_fuel_costs(boxes)
+            power_bill = PowerBill(pdf_file)
+            # boxes = get_boxes(pdf_file)
+            # start_date, end_date, service_length = get_dates(boxes)
+            # total_amount_owed = get_bill_amount(boxes)
+            # current_meter_reading = get_current_reading(boxes)
+            # previous_meter_reading = get_previous_reading(boxes)
+            # kwh_used = current_meter_reading - previous_meter_reading
+            # nonfuel_first_1000, nonfuel_over_1000 = get_nonfuel_costs(boxes)
+            # fuel_first_1000, fuel_over_1000 = get_fuel_costs(boxes)
 
             writer.writerow(
                 {
-                    "Start Date": start_date,
-                    "End Date": end_date,
-                    "Service Length": service_length,
-                    "Total Owed": total_amount_owed,
-                    "Current Meter Reading": current_meter_reading,
-                    "Previous Meter Reading": previous_meter_reading,
-                    "kWh Used": kwh_used,
-                    "Non-fuel First 1000 kWh": nonfuel_first_1000,
-                    "Non-fuel Over 1000 kWh": nonfuel_over_1000,
-                    "Fuel First 1000 kWh": fuel_first_1000,
-                    "Fuel Over 1000 kWh": fuel_over_1000,
+                    "Start Date": power_bill.start_date,
+                    "End Date": power_bill.end_date,
+                    "Service Length": power_bill.service_length,
+                    "Bill Amount": power_bill.bill_amount,
+                    "Current Meter Reading": power_bill.current_meter_reading,
+                    "Previous Meter Reading": power_bill.previous_meter_reading,
+                    "kWh Used": power_bill.kwh_used,
+                    "Non-fuel First 1000 kWh": power_bill.nonfuel_first_1000,
+                    "Non-fuel Over 1000 kWh": power_bill.nonfuel_over_1000,
+                    "Fuel First 1000 kWh": power_bill.fuel_first_1000,
+                    "Fuel Over 1000 kWh": power_bill.fuel_over_1000,
                 }
             )
 
