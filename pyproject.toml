@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "power-bill-extractor"
-version = "0.2.2"
+version = "0.3.2"
 description = "An FPL power bill extractor"
 license = "MIT"
 authors = ["Jason Hutson <110316760+HutsonJason@users.noreply.github.com>"]
