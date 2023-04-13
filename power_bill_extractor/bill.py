@@ -24,7 +24,11 @@ class PowerBill:
     fuel_over_1000: float = field(init=False)
 
     def __post_init__(self) -> None:
-        """Gets a list of 'text boxes' from pdfminer that are groups of text."""
+        # Retrieve groups of text that pdfminer determines are part of a text box from the
+        # given PDF file. It will iterate through each page of the PDF, then what pdfminer
+        # determines is an element of each page. If the element is a text box, it's added
+        # to the boxes list.
+
         self.boxes = [
             element.get_text()
             for page in extract_pages(self.pdf_file)
@@ -33,19 +37,16 @@ class PowerBill:
         ]
 
         for i, box in enumerate(self.boxes):
-            """Gets the start date, end date, and service length of the bill.
-            Example regex search:
-                'For: Jan 26, 2022 to Feb 25, 2022 (30 days)'"""
+            # Example regex search for start and end date, as well as service length:
+            # For: Jan 26, 2022 to Feb 25, 2022 (30 days)
+
             if matches := re.search(
                 r"For: ([a-z]{3} [0-9]{2}, 20[0-9]{2}) to ([a-z]{3} [0-9]{2}, 20[0-9]{2}) \(([0-9]{2}) days\)",
                 box,
                 re.IGNORECASE,
             ):
-                # Set the groups to the variables.
                 _start_date, _end_date, _service_length = matches.groups()
-                # Set the date format used in the PDF.
-                date_format = "%b %d, %Y"
-                # Format the dates and days.
+                date_format = "%b %d, %Y"  # Set the date format used in the PDF.
                 self.start_date = datetime.datetime.strptime(
                     _start_date, date_format
                 ).date()
@@ -54,23 +55,32 @@ class PowerBill:
                 ).date()
                 self.service_length = int(_service_length)
 
-            """Gets the total amount owed for the bill."""
             # The total bill is in the index between current bill and total amount you owe.
+
             if (
                 "current bill" in box.lower()
                 and "total amount you owe" in self.boxes[i + 2].lower()
             ):
                 self.bill_amount = float(self.boxes[i + 1].strip().removeprefix("$"))
 
-            """Gets the current meter reading for the bill."""
+            # Example regex search for the current meter reading (on 2 lines):
+            # Current
+            # 25549
+
             if matches := re.search(r"current\n(\d{5})", box, re.IGNORECASE):
                 self.current_meter_reading = int(matches.group(1))
 
-            """Gets the previous meter reading for the bill. """
+            # Example regex search for the previous meter reading (on 2 lines):
+            # Previous
+            # 24563
+
             if matches := re.search(r"previous\n(\d{5})", box, re.IGNORECASE):
                 self.previous_meter_reading = int(matches.group(1))
 
-            """Gets the non-fuel costs for the bill."""
+            # Example of regex search for the non-fuel prices (on 2 lines):
+            # First 1000 kWh at $0.073710)
+            # (Over 1000 kWh at $0.083710
+
             if "Non-fuel:" in box:
                 if matches := re.search(
                     r"First 1000 kWh at \$(0\.\d+)\)\n\(Over 1000 kWh at \$(0\.\d+)",
@@ -80,7 +90,10 @@ class PowerBill:
                     self.nonfuel_first_1000 = float(matches.group(1))
                     self.nonfuel_over_1000 = float(matches.group(2))
 
-            """Gets the fuel costs for the bill."""
+            # Example of regex search for the fuel prices (on 2 lines):
+            # First 1000 kWh at $0.034870)
+            # (Over 1000 kWh at $0.044870
+
             if "Fuel:" in box:
                 if matches := re.search(
                     r"First 1000 kWh at \$(0\.\d+)\)\n\(Over 1000 kWh at \$(0\.\d+)",
@@ -90,5 +103,4 @@ class PowerBill:
                     self.fuel_first_1000 = float(matches.group(1))
                     self.fuel_over_1000 = float(matches.group(2))
 
-        """Gets kWh used"""
         self.kwh_used = self.current_meter_reading - self.previous_meter_reading
